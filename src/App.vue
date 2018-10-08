@@ -8,6 +8,9 @@
         <Background v-if="step === 0" />
       </transition>
       <Claim v-if="step === 0" />
+      <div class="searchingRightNow">
+        Searching right now: {{ searchEmoji }}
+      </div>
       <SearchInput 
         v-model="searchValue"
         @input="handleEmoji"
@@ -35,6 +38,7 @@
 <script>
   import axios from 'axios';
   import jquery from 'jquery';
+  import emojidex from 'emojis-list';
   import debounce from 'lodash.debounce';
   import Claim from '@/components/Claim.vue';
   import SearchInput from '@/components/SearchInput.vue';
@@ -72,13 +76,15 @@
     },
     methods: {
       handleEmoji: debounce(function(){
-        console.log(this.searchValue);
         axios.get(`${APIEmoji}${this.searchValue}`)
           .then((response) => {
-            console.log(`${API}${this.searchValue}`);
-            console.log(response.data.moji);
-            this.searchEmoji = response.data.moji;
-            $("#search").val(this.searchEmoji);
+            console.log(`${APIEmoji}${this.searchValue}`);
+            // console.log(response.data.moji);
+            if(response.data.moji != undefined){
+              this.searchEmoji += response.data.moji + ' ';
+              $("#search").val('');
+              console.log(this.searchEmoji);
+            }
           })
           .catch((error) => {
             console.log(error);
@@ -91,6 +97,7 @@
       handleInput(){
         axios.get(`${API}q=${this.searchValue}`)
           .then((response) => {
+            console.log(`${API}q=${this.searchValue}`);
             this.results = response.data.data;
             this.step = 1;
           })
@@ -115,6 +122,19 @@
     font-family: Montserrat, sans-serif;
     margin: 0;
     padding: 0;
+  }
+  .searchingRightNow{
+    background: red;
+    color: yellow;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: 800;
+    border: 3px solid yellow;
+    margin-top: 50px;
+  }
+  button{
+    margin-top: 30px;
+    font-size: 20px;
   }
   .fade-enter-active, .fade-leave-active {
     transition: opacity .3s ease;

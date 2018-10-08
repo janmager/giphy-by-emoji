@@ -1,11 +1,11 @@
 <template>
     <div class="claimWrapper">
         <h1 class="claim">GIPHY-by-EMOJI</h1>
-        <p class="subclaim">
+        <!-- <p class="subclaim">
             Find gif on gifpy.com based on entered emoji.
             <br><br>
             Tap word to see recomended emojis.
-        </p>
+        </p> -->
     </div>
 </template>
 
