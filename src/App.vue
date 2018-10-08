@@ -10,9 +10,12 @@
       <Claim v-if="step === 0" />
       <SearchInput 
         v-model="searchValue"
-        @input="handleInput"
+        @input="handleEmoji"
         :dark="step === 1"
+        id="search"
       />
+      <button
+        @click="handleInput">Search by Emoji</button>
       <div class="results" v-if="results && step === 1">
         <Item 
           v-for="item in results" 
@@ -31,6 +34,7 @@
 
 <script>
   import axios from 'axios';
+  import jquery from 'jquery';
   import debounce from 'lodash.debounce';
   import Claim from '@/components/Claim.vue';
   import SearchInput from '@/components/SearchInput.vue';
@@ -39,7 +43,12 @@
   import Modal from '@/components/Modal.vue';
   import Backdrop from '@/components/Backdrop.vue';
 
+  global.jQuery = require('jquery');
+  var $ = global.jQuery;
+  window.$ = $;
+
   const API = 'http://api.giphy.com/v1/gifs/search?api_key=DEp6QvwCLGPbx3A8tqtBymRpVtcLG7OJ&limit=100&';
+  const APIEmoji = 'https://www.emojidex.com/api/v1/emoji/';
 
   export default {
     name: 'App',
@@ -57,17 +66,19 @@
         modalOpen: false,
         step: 0,
         searchValue: '',
+        searchEmoji: '',
         results: [],
       };
     },
     methods: {
-      handleInput: debounce(function(){
+      handleEmoji: debounce(function(){
         console.log(this.searchValue);
-        axios.get(`${API}q=${this.searchValue}`)
+        axios.get(`${APIEmoji}${this.searchValue}`)
           .then((response) => {
-            console.log(response.data.data[0].images.preview_gif.url);
-            this.results = response.data.data;
-            this.step = 1;
+            console.log(`${API}${this.searchValue}`);
+            console.log(response.data.moji);
+            this.searchEmoji = response.data.moji;
+            $("#search").val(this.searchEmoji);
           })
           .catch((error) => {
             console.log(error);
@@ -77,6 +88,16 @@
         this.modalOpen = true;
         this.modalItem = item;
       },
+      handleInput(){
+        axios.get(`${API}q=${this.searchValue}`)
+          .then((response) => {
+            this.results = response.data.data;
+            this.step = 1;
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     },
   };
 </script>
