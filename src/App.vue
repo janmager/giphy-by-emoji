@@ -8,11 +8,17 @@
         <Background v-if="step === 0" />
       </transition>
       <Claim v-if="step === 0" />
+      <div class="searchingRightNow">
+        Searching right now: {{ searchEmoji }}
+      </div>
       <SearchInput 
         v-model="searchValue"
-        @input="handleInput"
+        @input="handleEmoji"
         :dark="step === 1"
+        id="search"
       />
+      <button
+        @click="handleInput">Search by Emoji</button>
       <div class="results" v-if="results && step === 1">
         <Item 
           v-for="item in results" 
@@ -31,6 +37,8 @@
 
 <script>
   import axios from 'axios';
+  import jquery from 'jquery';
+  import emojidex from 'emojis-list';
   import debounce from 'lodash.debounce';
   import Claim from '@/components/Claim.vue';
   import SearchInput from '@/components/SearchInput.vue';
@@ -39,7 +47,12 @@
   import Modal from '@/components/Modal.vue';
   import Backdrop from '@/components/Backdrop.vue';
 
+  global.jQuery = require('jquery');
+  var $ = global.jQuery;
+  window.$ = $;
+
   const API = 'http://api.giphy.com/v1/gifs/search?api_key=DEp6QvwCLGPbx3A8tqtBymRpVtcLG7OJ&limit=100&';
+  const APIEmoji = 'https://www.emojidex.com/api/v1/emoji/';
 
   export default {
     name: 'App',
@@ -57,17 +70,21 @@
         modalOpen: false,
         step: 0,
         searchValue: '',
+        searchEmoji: '',
         results: [],
       };
     },
     methods: {
-      handleInput: debounce(function(){
-        console.log(this.searchValue);
-        axios.get(`${API}q=${this.searchValue}`)
+      handleEmoji: debounce(function(){
+        axios.get(`${APIEmoji}${this.searchValue}`)
           .then((response) => {
-            console.log(response.data.data[0].images.preview_gif.url);
-            this.results = response.data.data;
-            this.step = 1;
+            console.log(`${APIEmoji}${this.searchValue}`);
+            // console.log(response.data.moji);
+            if(response.data.moji != undefined){
+              this.searchEmoji += response.data.moji + ' ';
+              $("#search").val('');
+              console.log(this.searchEmoji);
+            }
           })
           .catch((error) => {
             console.log(error);
@@ -77,6 +94,17 @@
         this.modalOpen = true;
         this.modalItem = item;
       },
+      handleInput(){
+        axios.get(`${API}q=${this.searchValue}`)
+          .then((response) => {
+            console.log(`${API}q=${this.searchValue}`);
+            this.results = response.data.data;
+            this.step = 1;
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     },
   };
 </script>
@@ -94,6 +122,19 @@
     font-family: Montserrat, sans-serif;
     margin: 0;
     padding: 0;
+  }
+  .searchingRightNow{
+    background: red;
+    color: yellow;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: 800;
+    border: 3px solid yellow;
+    margin-top: 50px;
+  }
+  button{
+    margin-top: 30px;
+    font-size: 20px;
   }
   .fade-enter-active, .fade-leave-active {
     transition: opacity .3s ease;

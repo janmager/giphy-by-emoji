@@ -5,7 +5,7 @@
         :value="value"
         :class="{ dark }"
         @input="handleChange"
-        placeholder="Sad face"
+        placeholder="e.g. Sad face"
         autofocus
     />
 </template>
